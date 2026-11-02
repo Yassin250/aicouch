@@ -289,9 +289,8 @@ async function main() {
 
   console.log("Creating users…");
 
-  const [adminHash, lecturerHash, studentHash] = await Promise.all([
+  const [adminHash, studentHash] = await Promise.all([
     bcrypt.hash("Admin@123", 10),
-    bcrypt.hash("Lecturer@123", 10),
     bcrypt.hash("Student@123", 10),
   ]);
 
@@ -301,26 +300,6 @@ async function main() {
       email: "admin@mku.ac.rw",
       passwordHash: adminHash,
       role: "ADMIN",
-    },
-  });
-
-  const lecturerB = await prisma.user.create({
-    data: {
-      fullName: "Emmanuel Habimana",
-      email: "lecturer@mku.ac.rw",
-      passwordHash: lecturerHash,
-      role: "LECTURER",
-      programmeId: bbict.id,
-    },
-  });
-
-  const lecturerC = await prisma.user.create({
-    data: {
-      fullName: "Claudine Mukamana",
-      email: "claudine@mku.ac.rw",
-      passwordHash: lecturerHash,
-      role: "LECTURER",
-      programmeId: cs.id,
     },
   });
 
@@ -346,17 +325,6 @@ async function main() {
       programmeId: cs.id,
       yearOfStudy: 2,
     },
-  });
-
-  // Assign lecturers to their courses.
-  await prisma.course.updateMany({
-    where: { code: { in: ["BBICT2103", "BBICT3105", "BBICT2204"] } },
-    data: { lecturerId: lecturerB.id },
-  });
-
-  await prisma.course.updateMany({
-    where: { code: { in: ["CSC2103", "CSC2204", "CSC3105"] } },
-    data: { lecturerId: lecturerC.id },
   });
 
   console.log("Enrolling students…");
@@ -392,7 +360,7 @@ async function main() {
       description:
         "Functional dependencies, 1NF to BCNF, worked examples and common exam mistakes.",
       courseCode: "BBICT2103",
-      uploaderId: lecturerB.id,
+      uploaderId: alice.id,
       fileName: "bbict2103-week5-normalisation.txt",
       text: NOTES_NORMALISATION,
       pages: 6,
@@ -402,7 +370,7 @@ async function main() {
       description:
         "Keys, integrity constraints, joins, aggregation and null semantics.",
       courseCode: "BBICT2103",
-      uploaderId: lecturerB.id,
+      uploaderId: alice.id,
       fileName: "bbict2103-week3-relational-sql.txt",
       text: NOTES_RELATIONAL_SQL,
       pages: 7,
@@ -412,7 +380,7 @@ async function main() {
       description:
         "Abstract data types, LIFO and FIFO behaviour, circular queues and complexity.",
       courseCode: "CSC2103",
-      uploaderId: lecturerC.id,
+      uploaderId: jean.id,
       fileName: "csc2103-stacks-queues-lists.txt",
       text: NOTES_DATA_STRUCTURES,
       pages: 8,
@@ -422,7 +390,7 @@ async function main() {
       description:
         "All seven layers, encapsulation, and how OSI compares with TCP/IP.",
       courseCode: "CSC2204",
-      uploaderId: lecturerC.id,
+      uploaderId: jean.id,
       fileName: "csc2204-osi-model.txt",
       text: NOTES_OSI,
       pages: 5,
@@ -639,7 +607,7 @@ async function main() {
     data: {
       courseId: courses["BBICT2103"].id,
       documentId: documentIds["Week 5 — Normalisation"],
-      createdById: lecturerB.id,
+      createdById: alice.id,
       title: "Normalisation checkpoint",
       description: "5 questions · from Week 5 — Normalisation",
       difficulty: "MEDIUM",
@@ -660,7 +628,7 @@ async function main() {
     data: {
       courseId: courses["BBICT2103"].id,
       documentId: documentIds["Week 3 — The Relational Model and SQL"],
-      createdById: lecturerB.id,
+      createdById: alice.id,
       title: "SQL and the relational model",
       description: "4 questions · from Week 3 — The Relational Model and SQL",
       difficulty: "EASY",
@@ -681,7 +649,7 @@ async function main() {
     data: {
       courseId: courses["CSC2103"].id,
       documentId: documentIds["Stacks, Queues and Linked Lists"],
-      createdById: lecturerC.id,
+      createdById: jean.id,
       title: "Stacks and queues checkpoint",
       description: "4 questions · from Stacks, Queues and Linked Lists",
       difficulty: "MEDIUM",
@@ -905,41 +873,6 @@ async function main() {
   });
 
   // -------------------------------------------------------------------------
-  // Supplementary resources
-  // -------------------------------------------------------------------------
-
-  console.log("Creating resources…");
-
-  await prisma.resource.createMany({
-    data: [
-      {
-        courseId: courses["BBICT2103"].id,
-        title: "Khan Academy — Database Normalisation",
-        url: "https://www.khanacademy.org/computing/computer-science/sql/relational-queries-in-sql/v/normalization",
-        kind: "VIDEO",
-        description: "12-minute video that walks through 1NF, 2NF and 3NF with examples.",
-        createdById: lecturerB.id,
-      },
-      {
-        courseId: courses["BBICT2103"].id,
-        title: "W3Schools SQL Tutorial",
-        url: "https://www.w3schools.com/sql/",
-        kind: "LINK",
-        description: "Interactive exercises for SELECT, JOIN, GROUP BY and subqueries.",
-        createdById: lecturerB.id,
-      },
-      {
-        courseId: courses["CSC2103"].id,
-        title: "GeeksforGeeks — OSI Model",
-        url: "https://www.geeksforgeeks.org/osi-model-layers/",
-        kind: "ARTICLE",
-        description: "Detailed article with diagrams for each of the seven layers.",
-        createdById: lecturerC.id,
-      },
-    ],
-  });
-
-  // -------------------------------------------------------------------------
   // Audit trail and last sign-in times
   // -------------------------------------------------------------------------
 
@@ -971,7 +904,7 @@ async function main() {
         message: "PDF text extraction failed",
         detail:
           "scanned-handout.pdf (application/pdf, 2411520 bytes): no text layer found",
-        userId: lecturerB.id,
+        userId: alice.id,
         createdAt: daysAgo(2, 14),
       },
       {
@@ -1013,14 +946,12 @@ async function main() {
     plans: await prisma.studyPlan.count(),
     recommendations: await prisma.recommendation.count(),
     deadlines: await prisma.deadline.count(),
-    resources: await prisma.resource.count(),
   };
 
   console.log("\nSeed complete:", counts);
   console.log("\nDemo accounts");
   console.log("  Student   student@mku.ac.rw  / Student@123");
   console.log("  Student   jean@mku.ac.rw     / Student@123");
-  console.log("  Lecturer  lecturer@mku.ac.rw / Lecturer@123");
   console.log("  Admin     admin@mku.ac.rw    / Admin@123\n");
 
   void admin;

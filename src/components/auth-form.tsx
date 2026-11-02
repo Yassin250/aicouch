@@ -8,7 +8,6 @@ type Programme = { id: string; code: string; name: string };
 
 const DEMO = [
   { label: "Student", email: "student@mku.ac.rw", password: "Student@123" },
-  { label: "Lecturer", email: "lecturer@mku.ac.rw", password: "Lecturer@123" },
   { label: "Admin", email: "admin@mku.ac.rw", password: "Admin@123" },
 ];
 
@@ -38,7 +37,8 @@ export function LoginForm() {
         return;
       }
 
-      router.replace("/dashboard");
+      const target = data.role === "ADMIN" ? "/admin" : "/dashboard";
+      router.replace(target);
       router.refresh();
     } catch {
       setError("Could not reach the server. Check your connection.");

@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 const schema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("role"),
-    role: z.enum(["STUDENT", "LECTURER", "ADMIN"]),
+    role: z.enum(["STUDENT", "ADMIN"]),
   }),
   z.object({ action: z.literal("status"), isActive: z.boolean() }),
   z.object({

@@ -9,7 +9,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { CourseBars, ScoreBars } from "@/components/charts";
 import { RecommendationList } from "@/components/recommendation-list";
@@ -18,7 +18,7 @@ import { formatDate, relativeTime } from "@/lib/utils";
 export const metadata = { title: "Progress" };
 
 export default async function ProgressPage() {
-  const user = await requireUser();
+  const user = await requireStudent();
 
   const [attempts, activities, recommendations] = await Promise.all([
     db.quizAttempt.findMany({
@@ -172,7 +172,7 @@ export default async function ProgressPage() {
     <div className="space-y-5">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
             Your progress
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">

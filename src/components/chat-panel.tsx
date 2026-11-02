@@ -147,7 +147,7 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex h-[calc(100dvh-9.5rem)] min-h-[520px] flex-col overflow-hidden rounded-[16px] border border-line bg-surface shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+    <div className="flex h-[calc(100dvh-9.5rem)] min-h-[520px] flex-col overflow-hidden rounded-[16px] border border-line bg-surface shadow-[0_1px_2px_rgba(5,31,32,0.04)]">
       {/* Toolbar ------------------------------------------------------- */}
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-3.5 py-2.5">
         <span className="flex items-center gap-1.5 text-[12px] font-medium text-ink">
@@ -195,7 +195,7 @@ export function ChatPanel({
       <div className="flex-1 overflow-y-auto px-3.5 py-4 sm:px-5">
         {messages.length === 0 ? (
           <div className="mx-auto max-w-xl py-6 text-center">
-            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-[#6d5ef0] text-white shadow-[0_4px_14px_rgba(79,70,229,0.3)]">
+            <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#2E6B57] to-brand-deep text-white shadow-[0_4px_14px_rgba(35,83,71,0.3)]">
               <Sparkles size={19} />
             </span>
             <h2 className="mt-3 text-[17px] font-semibold tracking-tight text-ink">
@@ -203,7 +203,7 @@ export function ChatPanel({
             </h2>
             <p className="mx-auto mt-1.5 max-w-md text-[12.5px] leading-relaxed text-muted">
               Ask about any topic in your courses. Answers are grounded in the
-              lecture notes you have uploaded, and every claim is cited.
+              study notes you have uploaded, and every claim is cited.
             </p>
 
             <div className="mt-5 grid gap-2 text-left sm:grid-cols-2">
@@ -240,7 +240,7 @@ export function ChatPanel({
                       "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[10.5px] font-semibold",
                       isUser
                         ? "bg-surface-muted text-ink-soft"
-                        : "bg-gradient-to-br from-brand to-[#6d5ef0] text-white",
+                        : "bg-gradient-to-br from-[#2E6B57] to-brand-deep text-white",
                     )}
                   >
                     {isUser ? initials(userInitials) : <Sparkles size={13} />}
@@ -283,7 +283,7 @@ export function ChatPanel({
 
             {busy ? (
               <div className="animate-fade flex gap-2.5">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-[#6d5ef0] text-white">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#2E6B57] to-brand-deep text-white">
                   <Sparkles size={13} />
                 </span>
                 <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm border border-line bg-surface-muted px-3.5 py-2.5">
@@ -320,7 +320,7 @@ export function ChatPanel({
             event.preventDefault();
             send(input);
           }}
-          className="flex items-end gap-2 rounded-xl border border-line-strong bg-surface px-2 py-1.5 transition-colors focus-within:border-brand focus-within:shadow-[0_0_0_3px_rgba(79,70,229,0.12)]"
+          className="flex items-end gap-2 rounded-xl border border-line-strong bg-surface px-2 py-1.5 transition-colors focus-within:border-brand focus-within:shadow-[0_0_0_3px_rgba(35,83,71,0.12)]"
         >
           <textarea
             ref={textareaRef}
@@ -334,7 +334,7 @@ export function ChatPanel({
             }}
             rows={1}
             placeholder="Ask about a concept, a definition, or where you got stuck…"
-            className="max-h-40 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-[#98a2b3]"
+            className="max-h-40 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-[#93a89c]"
           />
 
           <button

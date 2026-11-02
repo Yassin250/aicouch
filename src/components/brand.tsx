@@ -10,7 +10,7 @@ export function BrandMark({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-gradient-to-br from-brand to-[#6d5ef0] text-white shadow-[0_2px_8px_rgba(79,70,229,0.35)]",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-gradient-to-br from-[#2E6B57] via-brand to-brand-deep text-white shadow-[0_2px_10px_-2px_rgba(11,43,38,0.55)] ring-1 ring-inset ring-white/15",
         className,
       )}
       style={{ width: size, height: size }}

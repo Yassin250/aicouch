@@ -15,7 +15,6 @@ const schema = z
     yearOfStudy: z.coerce.number().int().min(1).max(5),
     semester: z.coerce.number().int().min(1).max(2),
     credits: z.coerce.number().int().min(1).max(60),
-    lecturerId: z.string().nullable(),
     description: z.string().trim().max(400).nullable(),
   })
   .partial();
@@ -66,8 +65,6 @@ export async function PATCH(
     where: { id },
     data: {
       ...data,
-      lecturerId:
-        data.lecturerId === undefined ? undefined : data.lecturerId || null,
       description:
         data.description === undefined ? undefined : data.description || null,
     },

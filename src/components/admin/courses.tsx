@@ -16,7 +16,6 @@ import { Modal } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 
 type Programme = { id: string; code: string; name: string };
-type Lecturer = { id: string; fullName: string };
 
 export type ProgrammeRow = {
   id: string;
@@ -36,8 +35,6 @@ export type CourseRow = {
   yearOfStudy: number;
   semester: number;
   credits: number;
-  lecturerId: string | null;
-  lecturerName: string | null;
   description: string | null;
   documentCount: number;
   quizCount: number;
@@ -46,11 +43,9 @@ export type CourseRow = {
 export function CoursesManager({
   programmes,
   courses,
-  lecturers,
 }: {
   programmes: ProgrammeRow[];
   courses: CourseRow[];
-  lecturers: Lecturer[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +207,7 @@ export function CoursesManager({
             <table className="w-full min-w-[820px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-line bg-surface-muted">
-                  {["Code", "Title", "Programme", "Year", "Lecturer", "Content", ""].map(
+                  {["Code", "Title", "Programme", "Year", "Content", ""].map(
                     (heading) => (
                       <th
                         key={heading}
@@ -245,11 +240,6 @@ export function CoursesManager({
                     </td>
                     <td className="px-3 py-2.5 text-[11.5px] text-ink-soft">
                       Y{course.yearOfStudy} · S{course.semester}
-                    </td>
-                    <td className="px-3 py-2.5 text-[11.5px] text-ink-soft">
-                      {course.lecturerName ?? (
-                        <span className="text-muted">unassigned</span>
-                      )}
                     </td>
                     <td className="px-3 py-2.5 text-[11px] text-muted">
                       {course.documentCount} material
@@ -286,7 +276,6 @@ export function CoursesManager({
       <CourseDialog
         draft={courseDraft}
         programmes={programmes}
-        lecturers={lecturers}
         onClose={() => setCourseDraft(null)}
         onSaved={() => {
           setCourseDraft(null);
@@ -371,13 +360,11 @@ export function CoursesManager({
 function CourseDialog({
   draft,
   programmes,
-  lecturers,
   onClose,
   onSaved,
 }: {
   draft: CourseRow | "new" | null;
   programmes: Programme[];
-  lecturers: Lecturer[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -391,7 +378,6 @@ function CourseDialog({
     yearOfStudy: "1",
     semester: "1",
     credits: "15",
-    lecturerId: "",
     description: "",
   });
   const [busy, setBusy] = useState(false);
@@ -410,7 +396,6 @@ function CourseDialog({
         yearOfStudy: String(course.yearOfStudy),
         semester: String(course.semester),
         credits: String(course.credits),
-        lecturerId: course.lecturerId ?? "",
         description: course.description ?? "",
       });
     } else {
@@ -421,7 +406,6 @@ function CourseDialog({
         yearOfStudy: "1",
         semester: "1",
         credits: "15",
-        lecturerId: "",
         description: "",
       });
     }
@@ -442,7 +426,6 @@ function CourseDialog({
       yearOfStudy: Number(form.yearOfStudy),
       semester: Number(form.semester),
       credits: Number(form.credits),
-      lecturerId: form.lecturerId || null,
       description: form.description || null,
     };
 
@@ -584,25 +567,6 @@ function CourseDialog({
               className="field"
             />
           </div>
-        </div>
-
-        <div>
-          <label className="label" htmlFor="c-lecturer">
-            Lecturer
-          </label>
-          <select
-            id="c-lecturer"
-            value={form.lecturerId}
-            onChange={(event) => update("lecturerId", event.target.value)}
-            className="field"
-          >
-            <option value="">Unassigned</option>
-            {lecturers.map((lecturer) => (
-              <option key={lecturer.id} value={lecturer.id}>
-                {lecturer.fullName}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div>

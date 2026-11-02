@@ -14,7 +14,7 @@ const schema = z.object({
     .trim()
     .toLowerCase()
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, "Enter a valid email address"),
-  role: z.enum(["STUDENT", "LECTURER", "ADMIN"]),
+  role: z.enum(["STUDENT", "ADMIN"]),
   password: z.string().min(8, "Use at least 8 characters").max(72),
   programmeId: z.string().optional().nullable(),
   yearOfStudy: z.coerce.number().int().min(1).max(5).optional().nullable(),

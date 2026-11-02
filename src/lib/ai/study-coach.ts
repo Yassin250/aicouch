@@ -52,13 +52,13 @@ function sentencesOf(text: string) {
 function offlineAnswer(question: string, chunks: RetrievedChunk[]): string {
   if (!chunks.length) {
     return [
-      "I could not find this topic in the course materials you currently have access to.",
+      "I could not find this topic in the study materials you have uploaded.",
       "",
       "To get a grounded answer, try one of the following:",
       "",
-      "- Upload the relevant lecture notes as a PDF on the **Materials** page.",
+      "- Upload your study notes (PDF, Word, PowerPoint, image, or text) on the **Materials** page.",
       "- Select the specific course from the course filter, then ask again.",
-      "- Rephrase the question using the terms used in your lecture slides.",
+      "- Rephrase the question using key terms from your uploaded notes.",
       "",
       "*This reply was produced in offline mode. Add a Gemini API key in `.env` to enable full AI explanations.*",
     ].join("\n");
@@ -153,13 +153,13 @@ export async function answerStudyQuestion(input: {
   history?: Array<{ role: string; content: string }>;
   /** Used for retrieval when the question alone is too short to search with. */
   searchQuery?: string;
-  includeUnpublished?: boolean;
+  studentId?: string;
 }): Promise<StudyAnswer> {
   const chunks = await retrieveChunks({
     courseIds: input.courseIds,
     query: input.searchQuery || input.question,
     limit: 5,
-    includeUnpublished: input.includeUnpublished,
+    studentId: input.studentId,
   });
 
   const sources = toSources(chunks);

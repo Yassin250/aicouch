@@ -35,7 +35,6 @@ export type AdminUser = {
 
 const ROLE_STYLE: Record<string, string> = {
   ADMIN: "border-rose-soft bg-rose-soft text-rose",
-  LECTURER: "border-teal-soft bg-teal-soft text-teal",
   STUDENT: "border-brand-ring bg-brand-soft text-brand-dark",
 };
 
@@ -200,7 +199,6 @@ export function UsersTable({
                         )}
                       >
                         <option value="STUDENT">Student</option>
-                        <option value="LECTURER">Lecturer</option>
                         <option value="ADMIN">Admin</option>
                       </select>
                     </td>
@@ -721,9 +719,8 @@ export function CreateUserDialog({ programmes }: { programmes: Programme[] }) {
                 onChange={(event) => update("role", event.target.value)}
                 className="field"
               >
-                <option value="STUDENT">Student</option>
-                <option value="LECTURER">Lecturer</option>
-                <option value="ADMIN">Administrator</option>
+                        <option value="STUDENT">Student</option>
+                        <option value="ADMIN">Administrator</option>
               </select>
             </div>
 

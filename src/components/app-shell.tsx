@@ -31,17 +31,17 @@ type NavItem = {
   exact?: boolean;
 };
 
-const NAV: { section: string; items: NavItem[] }[] = [
+const STUDENT_NAV: { section: string; items: NavItem[] }[] = [
   {
-    section: "Study",
+    section: "Learning Hub",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { label: "AI Assistant", href: "/assistant", icon: Sparkles },
-      { label: "Materials", href: "/materials", icon: FileText },
+      { label: "My Materials", href: "/materials", icon: FileText },
+      { label: "AI Coach", href: "/assistant", icon: Sparkles },
     ],
   },
   {
-    section: "Practice",
+    section: "Revision & Practice",
     items: [
       { label: "Quizzes", href: "/quizzes", icon: ListChecks },
       { label: "Study Planner", href: "/planner", icon: CalendarDays },
@@ -50,18 +50,19 @@ const NAV: { section: string; items: NavItem[] }[] = [
   },
 ];
 
-const ADMIN_NAV: { section: string; items: NavItem[] } = {
-  section: "Administration",
-  items: [
-    { label: "Overview", href: "/admin", icon: Gauge, exact: true },
-    { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Programmes & Courses", href: "/admin/courses", icon: BookOpen },
-  ],
-};
+const ADMIN_NAV: { section: string; items: NavItem[] }[] = [
+  {
+    section: "Platform Management",
+    items: [
+      { label: "Overview", href: "/admin", icon: Gauge, exact: true },
+      { label: "Student Accounts", href: "/admin/users", icon: Users },
+      { label: "Programmes & Courses", href: "/admin/courses", icon: BookOpen },
+    ],
+  },
+];
 
 const ROLE_LABEL: Record<string, string> = {
   STUDENT: "Student",
-  LECTURER: "Lecturer",
   ADMIN: "Administrator",
 };
 
@@ -102,15 +103,13 @@ export function AppShell({
       : ROLE_LABEL[user.role] ?? "Member";
 
   const navGroups =
-    user.role === "ADMIN" ? [...NAV, ADMIN_NAV] : NAV;
+    user.role === "ADMIN" ? ADMIN_NAV : STUDENT_NAV;
 
   const nav = (
-    <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4">
+    <nav className="flex flex-1 flex-col gap-7 overflow-y-auto px-3 py-5">
       {navGroups.map((group) => (
         <div key={group.section}>
-          <div className="mb-1.5 px-2.5 text-[10.5px] font-semibold tracking-[0.08em] text-muted uppercase">
-            {group.section}
-          </div>
+          <div className="eyebrow mb-2 px-2.5">{group.section}</div>
           <ul className="space-y-0.5">
             {group.items.map((item) => {
               const active = item.exact
@@ -138,16 +137,23 @@ export function AppShell({
                   <Link
                     href={item.href}
                     className={cn(
-                      "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors",
+                      "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-all duration-150",
                       active
                         ? "bg-brand-soft text-brand-dark"
                         : "text-ink-soft hover:bg-surface-muted hover:text-ink",
                     )}
                   >
+                    {active ? (
+                      <span className="absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand" />
+                    ) : null}
                     <Icon
                       size={16}
                       strokeWidth={active ? 2.2 : 1.9}
-                      className={active ? "text-brand" : "text-muted group-hover:text-ink-soft"}
+                      className={
+                        active
+                          ? "text-brand"
+                          : "text-muted group-hover:text-ink-soft"
+                      }
                     />
                     {item.label}
                   </Link>
@@ -186,10 +192,18 @@ export function AppShell({
   return (
     <div className="min-h-screen lg:flex">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-[258px] shrink-0 flex-col border-r border-line bg-surface lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-[258px] shrink-0 flex-col border-r border-line bg-gradient-to-b from-surface via-surface to-surface-muted lg:flex">
         <div className="flex h-16 items-center border-b border-line px-4">
-          <Link href="/dashboard" className="outline-none">
-            <BrandLockup subtitle="MKU · Study Coach" compact />
+          <Link
+            href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+            className="outline-none"
+          >
+            <BrandLockup
+              subtitle={
+                user.role === "ADMIN" ? "Admin Portal" : "MKU · Study Coach"
+              }
+              compact
+            />
           </Link>
         </div>
         {nav}
@@ -205,7 +219,12 @@ export function AppShell({
           />
           <aside className="animate-rise absolute inset-y-0 left-0 flex w-[268px] flex-col border-r border-line bg-surface">
             <div className="flex h-16 items-center justify-between border-b border-line px-4">
-              <BrandLockup subtitle="MKU · Study Coach" compact />
+              <BrandLockup
+                subtitle={
+                  user.role === "ADMIN" ? "Admin Portal" : "MKU · Study Coach"
+                }
+                compact
+              />
               <button
                 onClick={() => setMobileOpen(false)}
                 className="rounded-md p-1.5 text-muted hover:bg-surface-muted"
@@ -229,7 +248,10 @@ export function AppShell({
             <Menu size={18} />
           </button>
 
-          <Link href="/dashboard" className="lg:hidden">
+          <Link
+            href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+            className="lg:hidden"
+          >
             <BrandMark size={28} />
           </Link>
 
@@ -253,13 +275,23 @@ export function AppShell({
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            <Link
-              href="/assistant"
-              className="btn btn-subtle hidden text-[13px] sm:inline-flex"
-            >
-              <Sparkles size={14} />
-              Ask the coach
-            </Link>
+            {user.role === "STUDENT" ? (
+              <Link
+                href="/assistant"
+                className="btn btn-subtle hidden text-[13px] sm:inline-flex"
+              >
+                <Sparkles size={14} />
+                Ask the coach
+              </Link>
+            ) : (
+              <Link
+                href="/admin/courses"
+                className="btn btn-subtle hidden text-[13px] sm:inline-flex"
+              >
+                <BookOpen size={14} />
+                Manage courses
+              </Link>
+            )}
 
             <div className="relative">
               <button

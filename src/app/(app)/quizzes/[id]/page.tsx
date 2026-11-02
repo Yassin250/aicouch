@@ -9,7 +9,7 @@ import {
   X,
 } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getCourseForUser } from "@/lib/courses";
 import { QuizRunner } from "@/components/quiz-runner";
@@ -47,7 +47,7 @@ export default async function QuizPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ retake?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireStudent();
   const { id } = await params;
   const { retake } = await searchParams;
 

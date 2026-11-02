@@ -1,6 +1,6 @@
 import { CalendarDays, CheckCircle2, Clock, Target } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { PlanDialog } from "@/components/plan-dialog";
@@ -10,7 +10,7 @@ import { formatDate } from "@/lib/utils";
 export const metadata = { title: "Study Planner" };
 
 export default async function PlannerPage() {
-  const user = await requireUser();
+  const user = await requireStudent();
 
   const [courses, plans, recommendations] = await Promise.all([
     getAccessibleCourses(user),
@@ -67,7 +67,7 @@ export default async function PlannerPage() {
     <div className="space-y-5">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
             Study planner
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">

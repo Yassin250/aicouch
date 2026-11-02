@@ -17,8 +17,8 @@ export type CourseWithMeta = Course & {
 
 /**
  * Every query in the system is scoped through this function so that a student
- * can only ever reach the courses they are enrolled in, a lecturer the courses
- * of their own programme, and an administrator everything.
+ * can only ever reach the courses they are enrolled in, and an administrator
+ * everything.
  */
 export async function getAccessibleCourses(
   user: SessionUser,
@@ -28,11 +28,6 @@ export async function getAccessibleCourses(
 
   if (user.role === "STUDENT") {
     where.enrollments = { some: { studentId: user.id } };
-  } else if (user.role === "LECTURER") {
-    where.OR = [
-      { lecturerId: user.id },
-      ...(user.programmeId ? [{ programmeId: user.programmeId }] : []),
-    ];
   }
 
   return db.course.findMany({
@@ -56,7 +51,7 @@ export async function getCourseForUser(courseId: string, user: SessionUser) {
   return courses.find((course) => course.id === courseId) ?? null;
 }
 
-/** Lecturers may contribute material; students may add their own notes. */
+/** Students may upload their own notes for any course they are enrolled in. */
 export function canUploadToCourse(user: SessionUser) {
-  return ["STUDENT", "LECTURER", "ADMIN"].includes(user.role);
+  return ["STUDENT", "ADMIN"].includes(user.role);
 }

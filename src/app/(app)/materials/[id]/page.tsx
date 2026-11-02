@@ -7,7 +7,6 @@ import {
   FileText,
   Layers,
   Sparkles,
-  User,
 } from "lucide-react";
 
 import { requireUser } from "@/lib/auth";
@@ -19,11 +18,9 @@ import {
   DeleteMaterialButton,
   SummarizeButton,
 } from "@/components/material-actions";
-import { EditMaterialDialog } from "@/components/edit-material-dialog";
+import { ImproveNotesButton } from "@/components/improve-notes-button";
 import { QuizGeneratorDialog } from "@/components/quiz-generator-dialog";
-import { ResourceList } from "@/components/resource-list";
 import { formatDate, formatFileSize } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 
 export default async function MaterialPage({
   params,
@@ -37,7 +34,6 @@ export default async function MaterialPage({
     where: { id },
     include: {
       course: { include: { programme: { select: { name: true } } } },
-      uploadedBy: { select: { fullName: true, role: true } },
       chunks: { orderBy: { chunkIndex: "asc" }, select: { content: true } },
     },
   });
@@ -47,22 +43,15 @@ export default async function MaterialPage({
   const course = await getCourseForUser(document.courseId, user);
   if (!course) notFound();
 
-  const isStaff = user.role === "LECTURER" || user.role === "ADMIN";
-  const canView = document.publishState === "PUBLISHED" || isStaff;
-  if (!canView) notFound();
-
-  const resources = await db.resource.findMany({
-    where: { courseId: document.courseId },
-    include: { createdBy: { select: { fullName: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  // Students can only view their own uploads.
+  if (document.uploadedById !== user.id && user.role !== "ADMIN") {
+    notFound();
+  }
 
   const fullText = mergeOverlappingChunks(
     document.chunks.map((chunk) => chunk.content),
   );
   const preview = fullText.slice(0, 2600);
-  const canDelete =
-    document.uploadedById === user.id || isStaff;
 
   const facts = [
     {
@@ -80,11 +69,6 @@ export default async function MaterialPage({
       label: "Uploaded",
       value: formatDate(document.createdAt),
     },
-    {
-      icon: User,
-      label: "Added by",
-      value: document.uploadedBy.fullName,
-    },
   ];
 
   return (
@@ -94,7 +78,7 @@ export default async function MaterialPage({
         className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-muted transition-colors hover:text-ink"
       >
         <ArrowLeft size={14} />
-        Back to materials
+        Back to my materials
       </Link>
 
       <div className="animate-rise flex flex-wrap items-start justify-between gap-4">
@@ -106,16 +90,6 @@ export default async function MaterialPage({
             <span className="chip border-line bg-surface-muted text-muted">
               {document.course.programme.name}
             </span>
-            {document.week ? (
-              <span className="chip border-brand-ring bg-brand-soft text-brand-dark">
-                Week {document.week}
-              </span>
-            ) : null}
-            {document.topic ? (
-              <span className="chip border-line bg-surface-muted text-muted">
-                {document.topic}
-              </span>
-            ) : null}
             {document.pageCount ? (
               <span className="chip border-line bg-surface-muted text-muted">
                 {document.pageCount} pages
@@ -124,20 +98,6 @@ export default async function MaterialPage({
             <span className="chip border-line bg-surface-muted text-muted">
               {formatFileSize(document.fileSize)}
             </span>
-            {isStaff ? (
-              <span
-                className={cn(
-                  "chip border px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider",
-                  document.publishState === "PUBLISHED"
-                    ? "border-emerald-soft bg-emerald-soft text-emerald"
-                    : document.publishState === "DRAFT"
-                      ? "border-amber-soft bg-amber-soft text-amber"
-                      : "border-line bg-surface-muted text-muted",
-                )}
-              >
-                {document.publishState.toLowerCase()}
-              </span>
-            ) : null}
           </div>
 
           <h1 className="mt-2 text-[23px] leading-tight font-semibold tracking-tight text-ink">
@@ -158,25 +118,35 @@ export default async function MaterialPage({
             <Download size={14} />
             Open original
           </a>
-          {isStaff ? (
-            <EditMaterialDialog
-              doc={{
-                id: document.id,
-                title: document.title,
-                description: document.description ?? "",
-                week: document.week ?? null,
-                topic: document.topic ?? "",
-                sessionNumber: document.sessionNumber ?? null,
-                publishState: document.publishState,
-              }}
-            />
-          ) : null}
-          {canDelete ? <DeleteMaterialButton documentId={document.id} /> : null}
+          <DeleteMaterialButton documentId={document.id} />
         </div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
         <div className="space-y-5">
+          {/* Improved notes ----------------------------------------------- */}
+          {document.improvedNotes ? (
+            <section className="card animate-rise overflow-hidden border-brand-ring">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-soft text-brand">
+                    <Sparkles size={13} />
+                  </span>
+                  <h2 className="text-[14px] font-semibold text-ink">
+                    AI-improved notes
+                  </h2>
+                </div>
+                <ImproveNotesButton
+                  documentId={document.id}
+                  label="Regenerate"
+                />
+              </div>
+              <div className="px-4 py-4">
+                <Markdown content={document.improvedNotes} />
+              </div>
+            </section>
+          ) : null}
+
           {/* Summary ----------------------------------------------------- */}
           <section className="card animate-rise overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3">
@@ -215,10 +185,10 @@ export default async function MaterialPage({
           <section className="card animate-rise overflow-hidden">
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h2 className="text-[14px] font-semibold text-ink">
-                Extracted text
+                Original extracted text
               </h2>
               <span className="text-[11.5px] text-muted">
-                what the coach can read
+                what the coach reads
               </span>
             </div>
             <div className="max-h-[380px] overflow-y-auto px-4 py-4">
@@ -299,11 +269,22 @@ export default async function MaterialPage({
             </div>
           </section>
 
-          <ResourceList
-            resources={resources}
-            courseId={document.courseId}
-            isStaff={isStaff}
-          />
+          {!document.improvedNotes ? (
+            <section className="card animate-rise p-4">
+              <h2 className="text-[14px] font-semibold text-ink">
+                Improve these notes
+              </h2>
+              <p className="mt-1 text-[12px] leading-relaxed text-muted">
+                The AI can rewrite your notes with better grammar, clearer
+                headings and organised structure.
+              </p>
+              <ImproveNotesButton
+                documentId={document.id}
+                label="Improve with AI"
+                variant="primary"
+              />
+            </section>
+          ) : null}
         </div>
       </div>
     </div>

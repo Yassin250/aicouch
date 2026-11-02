@@ -13,14 +13,19 @@ const ACCEPTED_MIME = [
   "text/markdown",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
 ];
 
-const ACCEPT_EXT = ".pdf,.docx,.pptx,.txt,.md";
+const ACCEPT_EXT = ".pdf,.docx,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp";
 
 function isAccepted(file: File) {
   if (ACCEPTED_MIME.includes(file.type)) return true;
   const ext = file.name.split(".").pop()?.toLowerCase();
-  return ["pdf", "docx", "pptx", "txt", "md"].includes(ext ?? "");
+  return ["pdf", "docx", "pptx", "txt", "md", "png", "jpg", "jpeg", "webp"].includes(
+    ext ?? "",
+  );
 }
 
 type CourseOption = {
@@ -42,13 +47,11 @@ export function UploadMaterialDialog({
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [courseId, setCourseId] = useState(defaultCourseId ?? courses[0]?.id ?? "");
+  const [courseId, setCourseId] = useState(
+    defaultCourseId ?? courses[0]?.id ?? "",
+  );
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [week, setWeek] = useState("");
-  const [topic, setTopic] = useState("");
-  const [sessionNumber, setSessionNumber] = useState("");
-  const [publishState, setPublishState] = useState("PUBLISHED");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -71,10 +74,6 @@ export function UploadMaterialDialog({
     setFile(null);
     setTitle("");
     setDescription("");
-    setWeek("");
-    setTopic("");
-    setSessionNumber("");
-    setPublishState("PUBLISHED");
     setError(null);
     setDone(null);
     setBusy(false);
@@ -90,7 +89,9 @@ export function UploadMaterialDialog({
     if (!next) return;
 
     if (!isAccepted(next)) {
-      setError("Only PDF, DOCX, PPTX, TXT or Markdown files are supported.");
+      setError(
+        "Only PDF, DOCX, PPTX, TXT, MD, PNG, JPG or WEBP files are supported.",
+      );
       return;
     }
     if (next.size > 15 * 1024 * 1024) {
@@ -119,10 +120,6 @@ export function UploadMaterialDialog({
     body.append("courseId", courseId);
     body.append("title", title);
     body.append("description", description);
-    if (week) body.append("week", week);
-    if (topic) body.append("topic", topic);
-    if (sessionNumber) body.append("session", sessionNumber);
-    body.append("publishState", publishState);
 
     try {
       const response = await fetch("/api/materials", { method: "POST", body });
@@ -169,10 +166,10 @@ export function UploadMaterialDialog({
                 <div className="flex items-center justify-between border-b border-line px-5 py-4">
                   <div>
                     <h2 className="text-[15px] font-semibold text-ink">
-                      Upload study material
+                      Upload your notes
                     </h2>
                     <p className="mt-0.5 text-[12px] text-muted">
-                      PDF, DOCX, PPTX, TXT or Markdown · up to 15 MB
+                      PDF, DOCX, PPTX, images, TXT or Markdown · up to 15 MB
                     </p>
                   </div>
                   <button
@@ -241,7 +238,9 @@ export function UploadMaterialDialog({
                       type="file"
                       accept={ACCEPT_EXT}
                       className="hidden"
-                      onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
+                      onChange={(event) =>
+                        pickFile(event.target.files?.[0] ?? null)
+                      }
                     />
                     <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface text-brand">
                       <Upload size={17} />
@@ -258,7 +257,7 @@ export function UploadMaterialDialog({
                     ) : (
                       <div className="mt-2.5">
                         <div className="text-[13px] font-medium text-ink">
-                          Drop your lecture notes here
+                          Drop your notes here
                         </div>
                         <div className="mt-0.5 text-[11.5px] text-muted">
                           or click to browse your files
@@ -275,7 +274,7 @@ export function UploadMaterialDialog({
                       id="title"
                       value={title}
                       onChange={(event) => setTitle(event.target.value)}
-                      placeholder="e.g. Week 5 — Normalisation"
+                      placeholder="e.g. Database Normalisation Notes"
                       className="field"
                       disabled={busy}
                     />
@@ -289,70 +288,7 @@ export function UploadMaterialDialog({
                       id="description"
                       value={description}
                       onChange={(event) => setDescription(event.target.value)}
-                      placeholder="What does this material cover?"
-                      className="field"
-                      disabled={busy}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="label" htmlFor="week">
-                        Week <span className="text-muted">(opt)</span>
-                      </label>
-                      <input
-                        id="week"
-                        type="number"
-                        min={1}
-                        max={52}
-                        value={week}
-                        onChange={(e) => setWeek(e.target.value)}
-                        className="field"
-                        disabled={busy}
-                      />
-                    </div>
-                    <div>
-                      <label className="label" htmlFor="session">
-                        Session <span className="text-muted">(opt)</span>
-                      </label>
-                      <input
-                        id="session"
-                        type="number"
-                        min={1}
-                        max={99}
-                        value={sessionNumber}
-                        onChange={(e) => setSessionNumber(e.target.value)}
-                        className="field"
-                        disabled={busy}
-                      />
-                    </div>
-                    <div>
-                      <label className="label" htmlFor="state">
-                        State
-                      </label>
-                      <select
-                        id="state"
-                        value={publishState}
-                        onChange={(e) => setPublishState(e.target.value)}
-                        className="field"
-                        disabled={busy}
-                      >
-                        <option value="DRAFT">Draft</option>
-                        <option value="PUBLISHED">Published</option>
-                        <option value="ARCHIVED">Archived</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="label" htmlFor="topic">
-                      Topic <span className="text-muted">(optional)</span>
-                    </label>
-                    <input
-                      id="topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value)}
-                      placeholder="e.g. Normalisation"
+                      placeholder="What do these notes cover?"
                       className="field"
                       disabled={busy}
                     />
@@ -375,7 +311,11 @@ export function UploadMaterialDialog({
                   >
                     Cancel
                   </button>
-                  <button type="submit" disabled={busy || !file} className="btn btn-primary">
+                  <button
+                    type="submit"
+                    disabled={busy || !file}
+                    className="btn btn-primary"
+                  >
                     {busy ? (
                       <>
                         <Loader2 size={14} className="animate-spin" />

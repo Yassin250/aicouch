@@ -14,7 +14,7 @@ import {
   Upload,
 } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { isAiConfigured } from "@/lib/ai/gemini";
@@ -32,7 +32,7 @@ function greeting() {
 }
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  const user = await requireStudent();
 
   const courses = await getAccessibleCourses(user, {
     _count: { select: { documents: true } },
@@ -59,7 +59,10 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     courseIds.length
       ? db.document.findMany({
-          where: { courseId: { in: courseIds } },
+          where: {
+            courseId: { in: courseIds },
+            ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+          },
           include: { course: { select: { code: true, title: true } } },
           orderBy: { createdAt: "desc" },
           take: 4,
@@ -72,11 +75,20 @@ export default async function DashboardPage() {
       take: 3,
     }),
     courseIds.length
-      ? db.document.count({ where: { courseId: { in: courseIds } } })
+      ? db.document.count({
+          where: {
+            courseId: { in: courseIds },
+            ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+          },
+        })
       : Promise.resolve(0),
     courseIds.length
       ? db.document.count({
-          where: { courseId: { in: courseIds }, summary: { not: null } },
+          where: {
+            courseId: { in: courseIds },
+            ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+            summary: { not: null },
+          },
         })
       : Promise.resolve(0),
     db.quizAttempt.findMany({
@@ -177,13 +189,11 @@ export default async function DashboardPage() {
       {/* Header ------------------------------------------------------------ */}
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[12px] font-medium tracking-[0.02em] text-brand">
-            {formatDate(new Date())}
-          </p>
-          <h1 className="mt-1 text-[26px] leading-tight font-semibold tracking-tight text-ink">
+          <p className="eyebrow text-brand">{formatDate(new Date())}</p>
+          <h1 className="mt-2 text-[28px] leading-[1.1] font-semibold tracking-[-0.035em] text-ink">
             {greeting()}, {firstName}
           </h1>
-          <p className="mt-1.5 text-[13.5px] text-muted">
+          <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
             {courses.length
               ? `${courses.length} course${courses.length === 1 ? "" : "s"}, ${materialCount} study material${materialCount === 1 ? "" : "s"}, ${recommendations.length} topic${recommendations.length === 1 ? "" : "s"} to revisit.`
               : "Your courses will appear here once you are enrolled."}
@@ -210,7 +220,7 @@ export default async function DashboardPage() {
             <div
               key={stat.label}
               className={cn(
-                "card animate-rise p-4",
+                "card animate-rise group p-4 transition-colors hover:border-brand-ring",
                 index === 1 && "delay-1",
                 index === 2 && "delay-2",
                 index === 3 && "delay-3",
@@ -220,14 +230,14 @@ export default async function DashboardPage() {
                 <span className="text-[11.5px] font-medium tracking-[0.01em] text-muted">
                   {stat.label}
                 </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand transition-colors group-hover:bg-brand group-hover:text-white">
                   <Icon size={14} strokeWidth={2} />
                 </span>
               </div>
-              <div className="mt-2.5 text-[24px] leading-none font-semibold tracking-tight text-ink">
+              <div className="mt-3 text-[28px] leading-none font-semibold tracking-[-0.035em] tabular-nums text-ink">
                 {stat.value}
               </div>
-              <div className="mt-1.5 text-[11.5px] text-muted">{stat.hint}</div>
+              <div className="mt-2 text-[11.5px] text-muted">{stat.hint}</div>
             </div>
           );
         })}
@@ -292,8 +302,8 @@ export default async function DashboardPage() {
                   No study material yet
                 </p>
                 <p className="mx-auto mt-1 max-w-sm text-[12.5px] text-muted">
-                  Upload your first lecture notes as a PDF and the coach will be
-                  able to explain, summarise and quiz you on them.
+                  Upload your study notes (PDF, Word, PowerPoint, text, or photos of handwritten notes) and the coach will be
+                  able to explain, improve, summarise and quiz you on them.
                 </p>
                 <Link href="/materials" className="btn btn-primary mt-4">
                   <Upload size={14} />
@@ -317,7 +327,7 @@ export default async function DashboardPage() {
                   <Link
                     key={course.id}
                     href={`/materials?course=${course.id}`}
-                    className="card group p-3.5 transition-all hover:-translate-y-0.5 hover:border-brand-ring hover:shadow-[0_4px_16px_rgba(79,70,229,0.08)]"
+                    className="card group p-3.5 transition-all hover:-translate-y-0.5 hover:border-brand-ring hover:shadow-[0_4px_16px_rgba(35,83,71,0.10)]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="chip border-line bg-surface-muted font-mono text-[10.5px] tracking-wide text-ink-soft">
@@ -389,6 +399,70 @@ export default async function DashboardPage() {
             ) : (
               <p className="px-4 py-6 text-center text-[11.5px] text-muted">
                 No conversations yet.
+              </p>
+            )}
+          </section>
+
+          <section className="card animate-rise overflow-hidden">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <div className="flex items-center gap-1.5">
+                <Trophy size={13} className="text-brand" />
+                <h2 className="text-[14px] font-semibold text-ink">
+                  Recent quiz results
+                </h2>
+              </div>
+              <Link
+                href="/quizzes"
+                className="text-[12px] font-medium text-brand hover:text-brand-dark"
+              >
+                Quizzes
+              </Link>
+            </div>
+
+            {recentAttempts.length ? (
+              <ul className="divide-y divide-line">
+                {recentAttempts.map((attempt) => {
+                  const percent = attempt.total
+                    ? Math.round((attempt.score / attempt.total) * 100)
+                    : 0;
+
+                  return (
+                    <li key={attempt.id}>
+                      <Link
+                        href={`/quizzes/${attempt.quiz.id}`}
+                        className="flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-surface-muted"
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[12.5px] font-medium text-ink">
+                            {attempt.quiz.title}
+                          </span>
+                          <span className="mt-0.5 block text-[10.5px] text-muted">
+                            {attempt.quiz.course.code} ·{" "}
+                            {relativeTime(attempt.completedAt!)}
+                          </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "chip shrink-0",
+                            percent >= 80
+                              ? "border-emerald-soft bg-emerald-soft text-emerald"
+                              : percent >= 60
+                                ? "border-brand-ring bg-brand-soft text-brand-dark"
+                                : percent >= 40
+                                  ? "border-amber-soft bg-amber-soft text-amber"
+                                  : "border-rose-soft bg-rose-soft text-rose",
+                          )}
+                        >
+                          {attempt.score}/{attempt.total}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="px-4 py-6 text-center text-[11.5px] text-muted">
+                No quiz attempts yet.
               </p>
             )}
           </section>
@@ -531,70 +605,6 @@ export default async function DashboardPage() {
                 courseCode: item.course?.code ?? null,
               }))}
             />
-          </section>
-
-          <section className="card animate-rise overflow-hidden">
-            <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <div className="flex items-center gap-1.5">
-                <Trophy size={13} className="text-brand" />
-                <h2 className="text-[14px] font-semibold text-ink">
-                  Recent quiz results
-                </h2>
-              </div>
-              <Link
-                href="/quizzes"
-                className="text-[12px] font-medium text-brand hover:text-brand-dark"
-              >
-                Quizzes
-              </Link>
-            </div>
-
-            {recentAttempts.length ? (
-              <ul className="divide-y divide-line">
-                {recentAttempts.map((attempt) => {
-                  const percent = attempt.total
-                    ? Math.round((attempt.score / attempt.total) * 100)
-                    : 0;
-
-                  return (
-                    <li key={attempt.id}>
-                      <Link
-                        href={`/quizzes/${attempt.quiz.id}`}
-                        className="flex items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-surface-muted"
-                      >
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[12.5px] font-medium text-ink">
-                            {attempt.quiz.title}
-                          </span>
-                          <span className="mt-0.5 block text-[10.5px] text-muted">
-                            {attempt.quiz.course.code} ·{" "}
-                            {relativeTime(attempt.completedAt!)}
-                          </span>
-                        </span>
-                        <span
-                          className={cn(
-                            "chip shrink-0",
-                            percent >= 80
-                              ? "border-emerald-soft bg-emerald-soft text-emerald"
-                              : percent >= 60
-                                ? "border-brand-ring bg-brand-soft text-brand-dark"
-                                : percent >= 40
-                                  ? "border-amber-soft bg-amber-soft text-amber"
-                                  : "border-rose-soft bg-rose-soft text-rose",
-                          )}
-                        >
-                          {attempt.score}/{attempt.total}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="px-4 py-6 text-center text-[11.5px] text-muted">
-                No quiz attempts yet.
-              </p>
-            )}
           </section>
 
           {!aiLive ? (

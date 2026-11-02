@@ -127,10 +127,9 @@ export async function retrieveChunks(options: {
   query: string;
   limit?: number;
   maxPerDocument?: number;
-  /** Lecturers and administrators may search drafts as well as published notes. */
-  includeUnpublished?: boolean;
+  studentId?: string;
 }): Promise<RetrievedChunk[]> {
-  const { courseIds, query } = options;
+  const { courseIds, query, studentId } = options;
   const limit = options.limit ?? 5;
   const maxPerDocument = options.maxPerDocument ?? 2;
 
@@ -141,9 +140,7 @@ export async function retrieveChunks(options: {
       document: {
         courseId: { in: courseIds },
         status: "READY",
-        ...(options.includeUnpublished
-          ? {}
-          : { publishState: "PUBLISHED" }),
+        ...(studentId ? { uploadedById: studentId } : {}),
       },
     },
     include: {

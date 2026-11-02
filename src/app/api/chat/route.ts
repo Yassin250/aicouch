@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     courseTitle: scopedCourse?.title,
     history: [...previous].reverse(),
     searchQuery,
-    includeUnpublished: user.role !== "STUDENT",
+    studentId: user.role === "STUDENT" ? user.id : undefined,
   });
 
   const assistantMessage = await db.chatMessage.create({

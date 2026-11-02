@@ -47,7 +47,11 @@ export async function POST(request: Request) {
   let document = null;
   if (documentId) {
     document = await db.document.findFirst({
-      where: { id: documentId, courseId: course.id },
+      where: {
+        id: documentId,
+        courseId: course.id,
+        ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+      },
       include: {
         chunks: { orderBy: { chunkIndex: "asc" }, select: { content: true } },
       },
@@ -55,7 +59,7 @@ export async function POST(request: Request) {
 
     if (!document) {
       return NextResponse.json(
-        { error: "That material is not part of this course." },
+        { error: "That material is not found in your study materials for this course." },
         { status: 404 },
       );
     }
@@ -67,7 +71,11 @@ export async function POST(request: Request) {
     text = mergeOverlappingChunks(document.chunks.map((chunk) => chunk.content));
   } else {
     const documents = await db.document.findMany({
-      where: { courseId: course.id, status: "READY" },
+      where: {
+        courseId: course.id,
+        status: "READY",
+        ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+      },
       include: {
         chunks: { orderBy: { chunkIndex: "asc" }, select: { content: true } },
       },
@@ -87,7 +95,7 @@ export async function POST(request: Request) {
       {
         error: document
           ? "There is not enough readable text in this material to build a quiz."
-          : "This course has no indexed material yet. Upload lecture notes first.",
+          : "You have no indexed material for this course yet. Upload your study notes first.",
       },
       { status: 422 },
     );

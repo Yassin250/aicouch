@@ -35,10 +35,6 @@ export async function POST(request: Request) {
   const courseId = String(form.get("courseId") ?? "");
   const titleInput = String(form.get("title") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
-  const weekInput = String(form.get("week") ?? "").trim();
-  const topic = String(form.get("topic") ?? "").trim();
-  const sessionInput = String(form.get("session") ?? "").trim();
-  const publishStateInput = String(form.get("publishState") ?? "PUBLISHED");
 
   if (!file || typeof file === "string") {
     return NextResponse.json({ error: "Choose a file to upload." }, { status: 400 });
@@ -70,16 +66,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const week = weekInput ? Number.parseInt(weekInput, 10) : null;
-  const sessionNumber = sessionInput
-    ? Number.parseInt(sessionInput, 10)
-    : null;
-  const publishState = ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(
-    publishStateInput,
-  )
-    ? publishStateInput
-    : "PUBLISHED";
-
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let text = "";
@@ -93,7 +79,7 @@ export async function POST(request: Request) {
     await logEvent({
       level: "ERROR",
       category: "UPLOAD",
-      message: "PDF text extraction failed",
+      message: "Text extraction failed",
       detail: `${file.name} (${file.type}, ${file.size} bytes): ${
         error instanceof Error ? error.message : "unknown error"
       }`,
@@ -103,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "That PDF could not be read. Try re-exporting it, or upload the notes as a TXT file.",
+          "That file could not be read. Try a different format or re-export it.",
       },
       { status: 422 },
     );
@@ -121,7 +107,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "No readable text was found in that file. Scanned or image-only PDFs need to be converted to text first.",
+          "No readable text was found in that file. Try a clearer image or a text-based document.",
       },
       { status: 422 },
     );
@@ -149,10 +135,6 @@ export async function POST(request: Request) {
       pageCount: pageCount || null,
       charCount: text.length,
       status: "READY",
-      week: Number.isFinite(week) ? week : null,
-      topic: topic || null,
-      sessionNumber: Number.isFinite(sessionNumber) ? sessionNumber : null,
-      publishState,
       chunks: {
         create: pieces.map((content, index) => ({
           chunkIndex: index,
@@ -172,7 +154,6 @@ export async function POST(request: Request) {
       title: document.title,
       chunks: pieces.length,
       embedded: Boolean(vectors),
-      publishState: document.publishState,
     },
   });
 }

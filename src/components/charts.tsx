@@ -17,12 +17,12 @@ export function ScoreRing({
 
   const tone =
     value >= 80
-      ? { ring: "#067647", text: "text-emerald" }
+      ? { ring: "#1f6b46", text: "text-emerald" }
       : value >= 60
-        ? { ring: "#4f46e5", text: "text-brand" }
+        ? { ring: "#235347", text: "text-brand" }
         : value >= 40
-          ? { ring: "#b54708", text: "text-amber" }
-          : { ring: "#c01048", text: "text-rose" };
+          ? { ring: "#8a5a12", text: "text-amber" }
+          : { ring: "#9d2b3f", text: "text-rose" };
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -32,7 +32,7 @@ export function ScoreRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e6e9f2"
+          stroke="#e2ece5"
           strokeWidth={stroke}
         />
         <circle

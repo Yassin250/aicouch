@@ -28,9 +28,9 @@ export async function DELETE(
   }
 
   const isOwner = quiz.createdById === user.id;
-  const isStaff = user.role === "LECTURER" || user.role === "ADMIN";
+  const isAdmin = user.role === "ADMIN";
 
-  if (!isOwner && !isStaff) {
+  if (!isOwner && !isAdmin) {
     return NextResponse.json({ error: "Not permitted." }, { status: 403 });
   }
 

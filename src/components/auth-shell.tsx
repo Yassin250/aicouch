@@ -7,7 +7,7 @@ const POINTS = [
   {
     icon: MessagesSquare,
     title: "Answers from your own notes",
-    body: "Every explanation is retrieved from the lecture material for your course, not from the open internet.",
+    body: "Every explanation is retrieved from the study materials you upload, not from the open internet.",
   },
   {
     icon: BookOpenCheck,
@@ -35,10 +35,10 @@ export function AuthShell({
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel ---------------------------------------------------- */}
-      <div className="relative hidden overflow-hidden bg-[#0f1330] p-10 lg:flex lg:flex-col">
-        <div className="grid-lines pointer-events-none absolute inset-0 opacity-[0.16]" />
-        <div className="pointer-events-none absolute -top-32 -left-24 h-[420px] w-[420px] rounded-full bg-brand/25 blur-[90px]" />
-        <div className="pointer-events-none absolute -right-28 bottom-0 h-[380px] w-[380px] rounded-full bg-teal/20 blur-[100px]" />
+      <div className="relative hidden overflow-hidden bg-gradient-to-br from-[#0B2B26] via-[#08211F] to-[#051F20] p-10 lg:flex lg:flex-col">
+        <div className="grid-lines-light pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute -top-32 -left-24 h-[420px] w-[420px] rounded-full bg-[#235347]/45 blur-[90px]" />
+        <div className="pointer-events-none absolute -right-28 bottom-0 h-[380px] w-[380px] rounded-full bg-[#8EB69B]/20 blur-[100px]" />
 
         <div className="relative">
           <Link href="/" className="inline-block">
@@ -81,7 +81,7 @@ export function AuthShell({
           </h2>
           <p className="mt-3 text-[13.5px] leading-relaxed text-white/60">
             An AI study coach for BBICT and Computer Science students — grounded
-            in the lecture notes your lecturers provide.
+            in your own uploaded notes and materials.
           </p>
 
           <ul className="mt-8 space-y-4">
@@ -126,14 +126,16 @@ export function AuthShell({
 
         <div className="flex flex-1 items-center justify-center px-6 py-8">
           <div className="w-full max-w-[400px]">
-            <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+            <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
               {title}
             </h1>
-            <p className="mt-1.5 text-[13.5px] text-muted">{subtitle}</p>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
+              {subtitle}
+            </p>
 
-            <div className="mt-6">{children}</div>
+            <div className="mt-7">{children}</div>
 
-            <div className="mt-5 text-[12.5px] text-muted">{footer}</div>
+            <div className="mt-6 text-[12.5px] text-muted">{footer}</div>
           </div>
         </div>
       </div>

@@ -1,33 +1,29 @@
 import Link from "next/link";
 import {
-  BookOpen,
   FileText,
   FolderOpen,
   Layers,
-  Pencil,
   Search,
   X,
 } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { UploadMaterialDialog } from "@/components/upload-material-dialog";
-import { EditMaterialDialog } from "@/components/edit-material-dialog";
 import { cn, formatFileSize, relativeTime } from "@/lib/utils";
 
-export const metadata = { title: "Materials" };
+export const metadata = { title: "My Materials" };
 
 export default async function MaterialsPage({
   searchParams,
 }: {
   searchParams: Promise<{ course?: string; q?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireStudent();
   const { course: courseFilter, q } = await searchParams;
 
   const query = (q ?? "").trim();
-  const isStaff = user.role === "LECTURER" || user.role === "ADMIN";
 
   const courses = await getAccessibleCourses(user, {
     _count: { select: { documents: true } },
@@ -36,14 +32,12 @@ export default async function MaterialsPage({
   const activeCourse = courses.find((item) => item.id === courseFilter);
   const scopeIds = activeCourse ? [activeCourse.id] : courses.map((c) => c.id);
 
-  // Students only see published material. Staff see everything.
-  const publishFilter = isStaff ? undefined : "PUBLISHED";
-
+  // Students see their own uploaded materials.
   const documents = scopeIds.length
     ? await db.document.findMany({
         where: {
           courseId: { in: scopeIds },
-          ...(publishFilter ? { publishState: publishFilter } : {}),
+          uploadedById: user.id,
           ...(query
             ? {
                 OR: [
@@ -62,10 +56,9 @@ export default async function MaterialsPage({
         },
         include: {
           course: { select: { code: true, title: true } },
-          uploadedBy: { select: { fullName: true } },
           _count: { select: { chunks: true } },
         },
-        orderBy: [{ week: "asc" }, { sessionNumber: "asc" }, { createdAt: "desc" }],
+        orderBy: { createdAt: "desc" },
       })
     : [];
 
@@ -81,11 +74,11 @@ export default async function MaterialsPage({
     <div className="space-y-5">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
-            Study materials
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
+            My study materials
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">
-            Lecture notes the coach can read, explain, summarise and quiz you on.
+            Notes, documents and images you have uploaded for the AI coach to read.
           </p>
         </div>
         {courses.length ? (
@@ -118,7 +111,7 @@ export default async function MaterialsPage({
             <input
               name="q"
               defaultValue={query}
-              placeholder="Search titles and note content…"
+              placeholder="Search your notes…"
               className="field pr-24 pl-9"
               aria-label="Search study materials"
             />
@@ -178,7 +171,7 @@ export default async function MaterialsPage({
       {query ? (
         <p className="text-[12.5px] text-muted">
           {documents.length} result{documents.length === 1 ? "" : "s"} for{" "}
-          <span className="font-medium text-ink">“{query}”</span>
+          <span className="font-medium text-ink">"{query}"</span>
           {activeCourse ? ` in ${activeCourse.code}` : ""}
         </p>
       ) : null}
@@ -187,96 +180,55 @@ export default async function MaterialsPage({
       {documents.length ? (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {documents.map((document) => (
-            <div
+            <Link
               key={document.id}
-              className={cn(
-                "card animate-rise group flex flex-col p-4 transition-all",
-                document.publishState === "ARCHIVED"
-                  ? "opacity-60 hover:opacity-100"
-                  : "hover:-translate-y-0.5 hover:border-brand-ring hover:shadow-[0_6px_20px_rgba(79,70,229,0.08)]",
-              )}
+              href={`/materials/${document.id}`}
+              className="card animate-rise group flex flex-col p-4 transition-all hover:-translate-y-0.5 hover:border-brand-ring hover:shadow-[0_6px_20px_rgba(35,83,71,0.10)]"
             >
-              <Link href={`/materials/${document.id}`} className="contents">
-                <div className="flex items-start gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-soft bg-rose-soft text-rose">
-                    <FileText size={16} strokeWidth={1.9} />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="line-clamp-2 text-[13.5px] leading-snug font-medium text-ink">
-                      {document.title}
-                    </h2>
-                    <p className="mt-0.5 truncate text-[11.5px] text-muted">
-                      {document.course.code} · {document.course.title}
-                    </p>
-                  </div>
-                </div>
-
-                {document.description ? (
-                  <p className="mt-2.5 line-clamp-2 text-[12px] leading-relaxed text-muted">
-                    {document.description}
+              <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-soft bg-rose-soft text-rose">
+                  <FileText size={16} strokeWidth={1.9} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="line-clamp-2 text-[13.5px] leading-snug font-medium text-ink">
+                    {document.title}
+                  </h2>
+                  <p className="mt-0.5 truncate text-[11.5px] text-muted">
+                    {document.course.code} · {document.course.title}
                   </p>
-                ) : null}
-
-                <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-3">
-                  {document.week ? (
-                    <span className="chip border-brand-ring bg-brand-soft text-brand-dark">
-                      Week {document.week}
-                    </span>
-                  ) : null}
-                  {document.topic ? (
-                    <span className="chip border-line bg-surface-muted text-muted">
-                      {document.topic}
-                    </span>
-                  ) : null}
-                  {isStaff ? (
-                    <span
-                      className={cn(
-                        "chip border px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider",
-                        document.publishState === "PUBLISHED"
-                          ? "border-emerald-soft bg-emerald-soft text-emerald"
-                          : document.publishState === "DRAFT"
-                            ? "border-amber-soft bg-amber-soft text-amber"
-                            : "border-line bg-surface-muted text-muted",
-                      )}
-                    >
-                      {document.publishState.toLowerCase()}
-                    </span>
-                  ) : null}
-                  <span className="chip border-line bg-surface-muted text-muted">
-                    {document.pageCount
-                      ? `${document.pageCount} page${document.pageCount === 1 ? "" : "s"}`
-                      : `${document._count.chunks} sections`}
-                  </span>
-                  <span className="chip border-line bg-surface-muted text-muted">
-                    {formatFileSize(document.fileSize)}
-                  </span>
-                  {document.summary ? (
-                    <span className="chip border-emerald-soft bg-emerald-soft text-emerald">
-                      Summarised
-                    </span>
-                  ) : null}
-                  <span className="ml-auto text-[10.5px] text-muted">
-                    {relativeTime(document.createdAt)}
-                  </span>
                 </div>
-              </Link>
+              </div>
 
-              {isStaff ? (
-                <div className="mt-2 flex items-center justify-end gap-1 border-t border-line pt-2">
-                  <EditMaterialDialog
-                    doc={{
-                      id: document.id,
-                      title: document.title,
-                      description: document.description ?? "",
-                      week: document.week ?? null,
-                      topic: document.topic ?? "",
-                      sessionNumber: document.sessionNumber ?? null,
-                      publishState: document.publishState,
-                    }}
-                  />
-                </div>
+              {document.description ? (
+                <p className="mt-2.5 line-clamp-2 text-[12px] leading-relaxed text-muted">
+                  {document.description}
+                </p>
               ) : null}
-            </div>
+
+              <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-3">
+                <span className="chip border-line bg-surface-muted text-muted">
+                  {document.pageCount
+                    ? `${document.pageCount} page${document.pageCount === 1 ? "" : "s"}`
+                    : `${document._count.chunks} sections`}
+                </span>
+                <span className="chip border-line bg-surface-muted text-muted">
+                  {formatFileSize(document.fileSize)}
+                </span>
+                {document.summary ? (
+                  <span className="chip border-emerald-soft bg-emerald-soft text-emerald">
+                    Summarised
+                  </span>
+                ) : null}
+                {document.improvedNotes ? (
+                  <span className="chip border-brand-ring bg-brand-soft text-brand-dark">
+                    Improved
+                  </span>
+                ) : null}
+                <span className="ml-auto text-[10.5px] text-muted">
+                  {relativeTime(document.createdAt)}
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       ) : (
@@ -286,16 +238,16 @@ export default async function MaterialsPage({
           </div>
           <h2 className="mt-3.5 text-[15px] font-semibold text-ink">
             {query
-              ? `No material matches “${query}”`
+              ? `No material matches "${query}"`
               : courses.length
-                ? "No material in this course yet"
+                ? "You have not uploaded any notes yet"
                 : "You are not enrolled in any course"}
           </h2>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">
             {query
-              ? "Try a shorter phrase, a single key term, or search all courses instead of one."
+              ? "Try a shorter phrase or a single key term."
               : courses.length
-                ? "Upload the lecture notes for this course. Once indexed, the AI assistant answers questions using only that material."
+                ? "Upload your notes, handouts or images. Once indexed, the AI coach can explain, summarise and quiz you on them."
                 : "Ask the administrator to enrol you in your courses, then come back to upload notes."}
           </p>
           <div className="mt-5 flex justify-center gap-2">

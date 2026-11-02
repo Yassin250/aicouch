@@ -14,7 +14,6 @@ const schema = z.object({
   yearOfStudy: z.coerce.number().int().min(1).max(5),
   semester: z.coerce.number().int().min(1).max(2),
   credits: z.coerce.number().int().min(1).max(60),
-  lecturerId: z.string().optional().nullable(),
   description: z.string().trim().max(400).optional(),
 });
 
@@ -53,7 +52,6 @@ export async function POST(request: Request) {
       yearOfStudy: data.yearOfStudy,
       semester: data.semester,
       credits: data.credits,
-      lecturerId: data.lecturerId || null,
       description: data.description || null,
     },
   });

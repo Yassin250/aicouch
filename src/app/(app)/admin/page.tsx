@@ -108,7 +108,7 @@ export default async function AdminOverviewPage() {
     {
       label: "Students",
       value: byRole("STUDENT"),
-      hint: `${byRole("LECTURER")} lecturers · ${byRole("ADMIN")} admins`,
+      hint: `${byRole("ADMIN")} admin${byRole("ADMIN") === 1 ? "" : "s"}`,
       icon: Users,
       href: "/admin/users?role=STUDENT",
     },
@@ -124,7 +124,7 @@ export default async function AdminOverviewPage() {
       value: documentCount,
       hint: `${chunkCount} sections · ${storageLabel}`,
       icon: FileText,
-      href: "/materials",
+      href: "/admin",
     },
   ];
 
@@ -146,7 +146,7 @@ export default async function AdminOverviewPage() {
     <div className="space-y-5">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
             System overview
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">
@@ -398,16 +398,16 @@ export default async function AdminOverviewPage() {
               </h2>
             </div>
             <p className="mt-1.5 text-[11.5px] leading-relaxed text-brand-dark/80">
-              Accounts, programmes and courses are managed here. Lecture
-              material stays with the lecturers who uploaded it; you can review
-              or remove any of it from the Materials page.
+              Student accounts, programmes and courses are managed here. Students
+              control their own learning materials. As an administrator, you
+              can monitor system usage, review reports and manage issues.
             </p>
             <Link
-              href="/materials"
+              href="/admin/courses"
               className="btn btn-ghost mt-3 w-full text-[12px]"
             >
-              <Sparkles size={12} />
-              Review all materials
+              <BookOpen size={12} />
+              Manage academic courses
             </Link>
           </section>
         </div>

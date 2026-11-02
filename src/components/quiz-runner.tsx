@@ -179,7 +179,7 @@ export function QuizRunner({
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl border px-3.5 py-3 text-left transition-all",
                     selected
-                      ? "border-brand bg-brand-soft shadow-[0_0_0_1px_rgba(79,70,229,0.35)]"
+                      ? "border-brand bg-brand-soft shadow-[0_0_0_1px_rgba(35,83,71,0.35)]"
                       : "border-line bg-surface hover:border-line-strong hover:bg-surface-muted",
                   )}
                 >

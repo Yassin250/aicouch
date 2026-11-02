@@ -7,7 +7,7 @@ export const metadata = { title: "Programmes & Courses" };
 export default async function AdminCoursesPage() {
   await requireRole("ADMIN");
 
-  const [programmes, courses, lecturers] = await Promise.all([
+  const [programmes, courses] = await Promise.all([
     db.programme.findMany({
       include: { _count: { select: { courses: true } } },
       orderBy: { code: "asc" },
@@ -15,22 +15,16 @@ export default async function AdminCoursesPage() {
     db.course.findMany({
       include: {
         programme: { select: { code: true } },
-        lecturer: { select: { fullName: true } },
         _count: { select: { documents: true, quizzes: true } },
       },
       orderBy: [{ yearOfStudy: "asc" }, { code: "asc" }],
-    }),
-    db.user.findMany({
-      where: { role: "LECTURER", isActive: true },
-      select: { id: true, fullName: true },
-      orderBy: { fullName: "asc" },
     }),
   ]);
 
   return (
     <div className="space-y-5">
       <div className="animate-rise">
-        <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+        <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
           Programmes &amp; courses
         </h1>
         <p className="mt-1 text-[13.5px] text-muted">
@@ -56,13 +50,10 @@ export default async function AdminCoursesPage() {
           yearOfStudy: course.yearOfStudy,
           semester: course.semester,
           credits: course.credits,
-          lecturerId: course.lecturerId,
-          lecturerName: course.lecturer?.fullName ?? null,
           description: course.description,
           documentCount: course._count.documents,
           quizCount: course._count.quizzes,
         }))}
-        lecturers={lecturers}
       />
     </div>
   );

@@ -129,7 +129,7 @@ export function QuizGeneratorDialog({
               Generate a practice quiz
             </h2>
             <p className="mt-0.5 text-[12px] text-muted">
-              Questions are built from your indexed lecture notes.
+              Questions are built from your indexed study notes.
             </p>
           </div>
           <button
@@ -186,7 +186,7 @@ export function QuizGeneratorDialog({
             </select>
             {courseDocuments.length === 0 ? (
               <p className="mt-1.5 text-[11.5px] text-amber">
-                Upload lecture notes for this course before generating a quiz.
+                Upload study notes for this course before generating a quiz.
               </p>
             ) : null}
           </div>

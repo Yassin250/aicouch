@@ -9,7 +9,6 @@ import { readSession } from "./session";
 
 export const ROLES = {
   STUDENT: "STUDENT",
-  LECTURER: "LECTURER",
   ADMIN: "ADMIN",
 } as const;
 
@@ -51,6 +50,13 @@ export async function requireUser() {
 export async function requireRole(...roles: Role[]) {
   const user = await requireUser();
   if (!roles.includes(user.role as Role)) redirect("/dashboard");
+  return user;
+}
+
+/** Ensures only students access student-facing study and revision tools. */
+export async function requireStudent() {
+  const user = await requireUser();
+  if (user.role === ROLES.ADMIN) redirect("/admin");
   return user;
 }
 

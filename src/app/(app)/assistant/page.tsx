@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MessageSquarePlus, Sparkles } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { isAiConfigured } from "@/lib/ai/gemini";
@@ -15,7 +15,7 @@ export default async function AssistantPage({
 }: {
   searchParams: Promise<{ course?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireStudent();
   const { course } = await searchParams;
 
   const courses = await getAccessibleCourses(user);
@@ -31,7 +31,7 @@ export default async function AssistantPage({
     <div className="space-y-4">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
             AI study assistant
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">

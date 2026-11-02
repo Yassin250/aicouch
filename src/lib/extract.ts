@@ -1,10 +1,11 @@
 import "server-only";
 
 import JSZip from "jszip";
+import { createWorker } from "tesseract.js";
 
 import { extractPdfText } from "./pdf";
 
-export type ExtractKind = "pdf" | "text" | "docx" | "pptx";
+export type ExtractKind = "pdf" | "text" | "docx" | "pptx" | "image";
 
 export const SUPPORTED_TYPES: Record<string, ExtractKind> = {
   "application/pdf": "pdf",
@@ -14,10 +15,14 @@ export const SUPPORTED_TYPES: Record<string, ExtractKind> = {
     "docx",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation":
     "pptx",
+  "image/png": "image",
+  "image/jpeg": "image",
+  "image/webp": "image",
 };
 
 /** Human readable list used in validation messages. */
-export const ACCEPTED_EXTENSIONS = ".pdf, .docx, .pptx, .txt, .md";
+export const ACCEPTED_EXTENSIONS =
+  ".pdf, .docx, .pptx, .txt, .md, .png, .jpg, .jpeg, .webp";
 
 const LEGACY_OFFICE: Record<string, string> = {
   doc: "Word 97-2003 (.doc) files cannot be read. Open the file and save it as .docx, then upload again.",
@@ -45,13 +50,17 @@ export function detectKind(
   if (extension === "docx") return "docx";
   if (extension === "pptx") return "pptx";
   if (extension === "txt" || extension === "md") return "text";
+  if (["png", "jpg", "jpeg", "webp"].includes(extension)) return "image";
 
   return null;
 }
 
 export function unsupportedMessage(fileName: string) {
   const legacy = LEGACY_OFFICE[extensionOf(fileName)];
-  return legacy ?? `Only ${ACCEPTED_EXTENSIONS} files can be indexed.`;
+  return (
+    legacy ??
+    `Only ${ACCEPTED_EXTENSIONS} files can be indexed.`
+  );
 }
 
 function decodeEntities(value: string) {
@@ -128,6 +137,18 @@ async function extractPptx(buffer: Buffer) {
   return { text: parts.join("\n\n"), pageCount: slides.length };
 }
 
+async function extractImage(buffer: Buffer) {
+  const worker = await createWorker("eng");
+  try {
+    const {
+      data: { text },
+    } = await worker.recognize(buffer);
+    return { text: text.trim(), pageCount: null };
+  } finally {
+    await worker.terminate();
+  }
+}
+
 export async function extractDocument(
   buffer: Buffer,
   kind: ExtractKind,
@@ -139,6 +160,7 @@ export async function extractDocument(
 
   if (kind === "docx") return extractDocx(buffer);
   if (kind === "pptx") return extractPptx(buffer);
+  if (kind === "image") return extractImage(buffer);
 
   return {
     text: buffer.toString("utf8").replace(/\r\n/g, "\n").trim(),

@@ -1,5 +1,21 @@
 import type { Metadata } from "next";
+import { Outfit, JetBrains_Mono } from "next/font/google";
+
 import "./globals.css";
+
+const fontSans = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-code",
+  display: "swap",
+  weight: ["400", "500"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -7,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s · Study Coach",
   },
   description:
-    "An AI-based study coach for BBICT and Computer Science students at Mount Kigali University. Ask questions about your lecture notes, get summaries, and revise with material grounded in your own course content.",
+    "An AI-based study coach for students. Upload your own notes, ask questions grounded in them, get improved notes and summaries, and revise with quizzes.",
 };
 
 export default function RootLayout({
@@ -16,7 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html
+      lang="en"
+      className={`${fontSans.variable} ${fontMono.variable} h-full`}
+    >
       <body className="min-h-full antialiased">{children}</body>
     </html>
   );

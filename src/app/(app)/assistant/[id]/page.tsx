@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MessageSquarePlus } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { isAiConfigured } from "@/lib/ai/gemini";
@@ -32,7 +32,7 @@ export default async function ConversationPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireStudent();
   const { id } = await params;
 
   const session = await db.chatSession.findFirst({

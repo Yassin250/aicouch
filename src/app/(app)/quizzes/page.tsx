@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ListChecks, Trophy } from "lucide-react";
 
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getAccessibleCourses } from "@/lib/courses";
 import { QuizGeneratorDialog } from "@/components/quiz-generator-dialog";
@@ -20,7 +20,7 @@ export default async function QuizzesPage({
 }: {
   searchParams: Promise<{ document?: string }>;
 }) {
-  const user = await requireUser();
+  const user = await requireStudent();
   const { document: documentParam } = await searchParams;
 
   const courses = await getAccessibleCourses(user);
@@ -29,7 +29,10 @@ export default async function QuizzesPage({
   const [quizzes, documents] = await Promise.all([
     courseIds.length
       ? db.quiz.findMany({
-          where: { courseId: { in: courseIds } },
+          where: {
+            courseId: { in: courseIds },
+            ...(user.role === "STUDENT" ? { createdById: user.id } : {}),
+          },
           include: {
             course: { select: { code: true, title: true } },
             _count: { select: { questions: true } },
@@ -45,7 +48,11 @@ export default async function QuizzesPage({
       : Promise.resolve([]),
     courseIds.length
       ? db.document.findMany({
-          where: { courseId: { in: courseIds }, status: "READY" },
+          where: {
+            courseId: { in: courseIds },
+            status: "READY",
+            ...(user.role === "STUDENT" ? { uploadedById: user.id } : {}),
+          },
           select: { id: true, title: true, courseId: true },
           orderBy: { createdAt: "desc" },
         })
@@ -62,11 +69,11 @@ export default async function QuizzesPage({
     <div className="space-y-5">
       <div className="animate-rise flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] leading-tight font-semibold tracking-tight text-ink">
+          <h1 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.03em] text-ink">
             Practice quizzes
           </h1>
           <p className="mt-1 text-[13.5px] text-muted">
-            Test yourself on your own lecture material. Every answer is explained.
+            Test yourself on your own study materials. Every answer is explained.
           </p>
         </div>
 
@@ -100,7 +107,7 @@ export default async function QuizzesPage({
             return (
               <div
                 key={quiz.id}
-                className="card animate-rise flex flex-col p-4 transition-all hover:border-brand-ring hover:shadow-[0_6px_20px_rgba(79,70,229,0.07)]"
+                className="card animate-rise flex flex-col p-4 transition-all hover:border-brand-ring hover:shadow-[0_6px_20px_rgba(35,83,71,0.09)]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span
@@ -167,8 +174,8 @@ export default async function QuizzesPage({
           </h2>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">
             {documents.length
-              ? "Generate a practice quiz from one of your lecture documents. Questions are written from the material you uploaded."
-              : "Upload lecture notes first — quizzes are generated from your own material, not from a generic question bank."}
+              ? "Generate a practice quiz from one of your study documents. Questions are written from the material you uploaded."
+              : "Upload your study notes first — quizzes are generated from your own material, not from a generic question bank."}
           </p>
           {documents.length ? (
             <div className="mt-5 flex justify-center">
@@ -185,7 +192,7 @@ export default async function QuizzesPage({
             </div>
           ) : (
             <Link href="/materials" className="btn btn-primary mt-5">
-              Upload lecture notes
+              Upload study notes
             </Link>
           )}
         </div>
