@@ -166,7 +166,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Stats ----------------------------------------------------------- */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
@@ -174,24 +174,24 @@ export default async function AdminOverviewPage() {
               key={stat.label}
               href={stat.href}
               className={cn(
-                "card animate-rise p-4 transition-colors hover:border-brand-ring",
+                "card card-interactive animate-rise group p-5 transition-all hover:border-sage",
                 index === 1 && "delay-1",
                 index === 2 && "delay-2",
                 index === 3 && "delay-3",
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11.5px] font-medium text-muted">
+                <span className="text-[12px] font-bold tracking-[0.06em] uppercase text-muted">
                   {stat.label}
                 </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand">
-                  <Icon size={13} />
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand transition-all group-hover:scale-105 group-hover:bg-brand group-hover:text-white">
+                  <Icon size={17} strokeWidth={2.2} />
                 </span>
               </div>
-              <div className="mt-2.5 text-[24px] leading-none font-semibold text-ink">
+              <div className="mt-3 text-[32px] leading-none font-bold tracking-tight text-ink">
                 {stat.value}
               </div>
-              <div className="mt-1.5 text-[11px] text-muted">{stat.hint}</div>
+              <div className="mt-2 text-[12px] font-medium text-muted">{stat.hint}</div>
             </Link>
           );
         })}

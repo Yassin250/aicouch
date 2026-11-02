@@ -56,12 +56,39 @@ export async function POST(request: Request) {
     },
   });
 
+  // Auto-enrol all existing students in this programme whose year of study
+  // is >= the course year, so they see the new course immediately without
+  // the admin having to manually update every student's enrollments.
+  const eligibleStudents = await db.user.findMany({
+    where: {
+      role: "STUDENT",
+      programmeId: data.programmeId,
+      yearOfStudy: { gte: data.yearOfStudy },
+      isActive: true,
+    },
+    select: { id: true },
+  });
+
+  if (eligibleStudents.length > 0) {
+    await db.enrollment.createMany({
+      data: eligibleStudents.map((student) => ({
+        studentId: student.id,
+        courseId: course.id,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
   await logEvent({
     category: "ADMIN",
     message: "Created course",
-    detail: `${code} — ${data.title}`,
+    detail: `${code} — ${data.title} (auto-enrolled ${eligibleStudents.length} student${eligibleStudents.length === 1 ? "" : "s"})`,
     userId: admin.id,
   });
 
-  return NextResponse.json({ ok: true, id: course.id });
+  return NextResponse.json({
+    ok: true,
+    id: course.id,
+    enrolled: eligibleStudents.length,
+  });
 }

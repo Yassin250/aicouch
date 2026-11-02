@@ -213,31 +213,31 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats ------------------------------------------------------------- */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.label}
               className={cn(
-                "card animate-rise group p-4 transition-colors hover:border-brand-ring",
+                "card card-interactive animate-rise group p-5 transition-all hover:border-sage",
                 index === 1 && "delay-1",
                 index === 2 && "delay-2",
                 index === 3 && "delay-3",
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11.5px] font-medium tracking-[0.01em] text-muted">
+                <span className="text-[12px] font-bold tracking-[0.06em] uppercase text-muted">
                   {stat.label}
                 </span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-soft text-brand transition-colors group-hover:bg-brand group-hover:text-white">
-                  <Icon size={14} strokeWidth={2} />
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-soft text-brand transition-all group-hover:scale-105 group-hover:bg-brand group-hover:text-white group-hover:shadow-[0_4px_14px_rgba(35,83,71,0.25)]">
+                  <Icon size={18} strokeWidth={2.2} />
                 </span>
               </div>
-              <div className="mt-3 text-[28px] leading-none font-semibold tracking-[-0.035em] tabular-nums text-ink">
+              <div className="mt-3.5 text-[34px] leading-none font-bold tracking-tight tabular-nums text-ink">
                 {stat.value}
               </div>
-              <div className="mt-2 text-[11.5px] text-muted">{stat.hint}</div>
+              <div className="mt-2.5 text-[12.5px] font-medium text-muted">{stat.hint}</div>
             </div>
           );
         })}

@@ -10,7 +10,7 @@ export function BrandMark({
   return (
     <span
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[11px] bg-gradient-to-br from-[#2E6B57] via-brand to-brand-deep text-white shadow-[0_2px_10px_-2px_rgba(11,43,38,0.55)] ring-1 ring-inset ring-white/15",
+        "relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-gradient-to-br from-[#235347] via-[#163832] to-[#0B2B26] text-white shadow-[0_3px_12px_-2px_rgba(11,43,38,0.45)] ring-1 ring-inset ring-[#8EB69B]/30",
         className,
       )}
       style={{ width: size, height: size }}
@@ -42,14 +42,14 @@ export function BrandLockup({
   compact?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <BrandMark size={compact ? 32 : 36} />
+    <div className="flex items-center gap-3">
+      <BrandMark size={compact ? 34 : 38} />
       <div className="leading-tight">
-        <div className="text-[14.5px] font-semibold tracking-tight text-ink">
+        <div className="text-[15.5px] font-bold tracking-tight text-ink">
           Study Coach
         </div>
         {subtitle ? (
-          <div className="text-[11px] font-medium tracking-[0.01em] text-muted">
+          <div className="text-[12px] font-semibold tracking-[0.01em] text-muted">
             {subtitle}
           </div>
         ) : null}

@@ -137,22 +137,22 @@ export function AppShell({
                   <Link
                     href={item.href}
                     className={cn(
-                      "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-all duration-150",
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14.5px] font-semibold transition-all duration-150",
                       active
-                        ? "bg-brand-soft text-brand-dark"
-                        : "text-ink-soft hover:bg-surface-muted hover:text-ink",
+                        ? "bg-mint text-brand-deep shadow-[0_1px_3px_rgba(5,31,32,0.06)] ring-1 ring-sage/40"
+                        : "text-muted hover:bg-surface-muted hover:text-ink",
                     )}
                   >
                     {active ? (
-                      <span className="absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand" />
+                      <span className="absolute top-1/2 left-0 h-5 w-[3.5px] -translate-y-1/2 rounded-r-full bg-brand" />
                     ) : null}
                     <Icon
-                      size={16}
-                      strokeWidth={active ? 2.2 : 1.9}
+                      size={18}
+                      strokeWidth={active ? 2.3 : 1.9}
                       className={
                         active
-                          ? "text-brand"
-                          : "text-muted group-hover:text-ink-soft"
+                          ? "text-brand-deep"
+                          : "text-muted group-hover:text-ink"
                       }
                     />
                     {item.label}
@@ -167,23 +167,25 @@ export function AppShell({
   );
 
   const footer = (
-    <div className="border-t border-line p-3">
-      <div className="flex items-center gap-2.5 rounded-lg px-1.5 py-1.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[11.5px] font-semibold text-brand-dark">
+    <div className="border-t border-line p-3.5">
+      <div className="flex items-center gap-3 rounded-xl px-2 py-1.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mint text-[12.5px] font-bold text-brand-deep ring-1 ring-sage/40">
           {initials(user.fullName)}
         </span>
         <div className="min-w-0 flex-1 leading-tight">
-          <div className="truncate text-[13px] font-medium text-ink">
+          <div className="truncate text-[14px] font-bold text-ink">
             {user.fullName}
           </div>
-          <div className="truncate text-[11px] text-muted">{subtitle}</div>
+          <div className="truncate text-[12px] font-medium text-muted">
+            {subtitle}
+          </div>
         </div>
         <button
           onClick={signOut}
           title="Sign out"
-          className="rounded-md p-1.5 text-muted transition-colors hover:bg-rose-soft hover:text-rose"
+          className="rounded-lg p-2 text-muted transition-colors hover:bg-rose-soft hover:text-rose"
         >
-          <LogOut size={15} strokeWidth={2} />
+          <LogOut size={16} strokeWidth={2} />
         </button>
       </div>
     </div>
