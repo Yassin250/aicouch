@@ -170,27 +170,25 @@ export async function DELETE(
     );
   }
 
-  const target = await db.user.findUnique({
-    where: { id },
-    include: {
-      _count: { select: { uploadedDocs: true, createdQuizzes: true } },
-    },
-  });
+  const target = await db.user.findUnique({ where: { id } });
 
   if (!target) {
     return NextResponse.json({ error: "Account not found." }, { status: 404 });
   }
 
-  if (target._count.uploadedDocs > 0 || target._count.createdQuizzes > 0) {
-    return NextResponse.json(
-      {
-        error: `This account still owns ${target._count.uploadedDocs} material(s) and ${target._count.createdQuizzes} quiz(zes). Deactivate the account instead, or reassign that content first.`,
-      },
-      { status: 409 },
-    );
-  }
-
-  await db.user.delete({ where: { id } });
+  // Admins may fully remove a student account, including all owned content.
+  await db.$transaction([
+    db.documentChunk.deleteMany({ where: { document: { uploadedById: id } } }),
+    db.quiz.deleteMany({ where: { createdById: id } }),
+    db.document.deleteMany({ where: { uploadedById: id } }),
+    db.quizAttempt.deleteMany({ where: { studentId: id } }),
+    db.chatSession.deleteMany({ where: { studentId: id } }),
+    db.studyPlan.deleteMany({ where: { studentId: id } }),
+    db.recommendation.deleteMany({ where: { studentId: id } }),
+    db.deadline.deleteMany({ where: { studentId: id } }),
+    db.enrollment.deleteMany({ where: { studentId: id } }),
+    db.user.delete({ where: { id } }),
+  ]);
 
   await logEvent({
     level: "WARN",

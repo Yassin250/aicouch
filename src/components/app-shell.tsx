@@ -15,6 +15,7 @@ import {
   Menu,
   Sparkles,
   TrendingUp,
+  User,
   Users,
   X,
   type LucideIcon,
@@ -38,6 +39,7 @@ const STUDENT_NAV: { section: string; items: NavItem[] }[] = [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "My Materials", href: "/materials", icon: FileText },
       { label: "AI Coach", href: "/assistant", icon: Sparkles },
+      { label: "Profile", href: "/profile", icon: User },
     ],
   },
   {
@@ -57,6 +59,7 @@ const ADMIN_NAV: { section: string; items: NavItem[] }[] = [
       { label: "Overview", href: "/admin", icon: Gauge, exact: true },
       { label: "Student Accounts", href: "/admin/users", icon: Users },
       { label: "Programmes & Courses", href: "/admin/courses", icon: BookOpen },
+      { label: "Profile", href: "/profile", icon: User },
     ],
   },
 ];

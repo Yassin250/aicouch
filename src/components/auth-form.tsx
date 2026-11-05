@@ -2,19 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 type Programme = { id: string; code: string; name: string };
-
-const DEMO = [
-  { label: "Student", email: "student@mku.ac.rw", password: "Student@123" },
-  { label: "Admin", email: "admin@mku.ac.rw", password: "Admin@123" },
-];
 
 export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,16 +65,26 @@ export function LoginForm() {
           <label className="label" htmlFor="password">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="••••••••"
-            className="field"
-            required
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••"
+              className="field pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
         {error ? (
@@ -107,33 +113,6 @@ export function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 rounded-xl border border-line bg-surface-muted p-3">
-        <div className="text-[10.5px] font-semibold tracking-[0.06em] text-muted uppercase">
-          Demo accounts
-        </div>
-        <div className="mt-2 space-y-1.5">
-          {DEMO.map((account) => (
-            <button
-              key={account.email}
-              type="button"
-              onClick={() => {
-                setEmail(account.email);
-                setPassword(account.password);
-                setError(null);
-              }}
-              className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left transition-colors hover:bg-white"
-            >
-              <span className="chip border-brand-ring bg-brand-soft text-[9.5px] text-brand-dark">
-                {account.label}
-              </span>
-              <span className="flex-1 truncate font-mono text-[11px] text-ink-soft">
-                {account.email}
-              </span>
-              <span className="text-[10.5px] text-muted">fill</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -150,6 +129,7 @@ export function RegisterForm({ programmes }: { programmes: Programme[] }) {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   function update(key: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -272,17 +252,27 @@ export function RegisterForm({ programmes }: { programmes: Programme[] }) {
         <label className="label" htmlFor="regPassword">
           Password
         </label>
-        <input
-          id="regPassword"
-          type="password"
-          autoComplete="new-password"
-          value={form.password}
-          onChange={(event) => update("password", event.target.value)}
-          placeholder="At least 8 characters"
-          className="field"
-          minLength={8}
-          required
-        />
+        <div className="relative">
+          <input
+            id="regPassword"
+            type={showPassword ? "text" : "password"}
+            autoComplete="new-password"
+            value={form.password}
+            onChange={(event) => update("password", event.target.value)}
+            placeholder="At least 8 characters"
+            className="field pr-10"
+            minLength={8}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-ink"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
       </div>
 
       {error ? (
